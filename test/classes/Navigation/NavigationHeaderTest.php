@@ -58,6 +58,11 @@ class NavigationHeaderTest extends PmaTestCase
         unset($this->object);
     }
 
+    /**
+     * Tests getDisplay() method.
+     *
+     * @return void
+     */
     public function testGetDisplay()
     {
         $result = $this->object->getDisplay();

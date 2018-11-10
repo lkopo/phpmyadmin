@@ -234,7 +234,7 @@ class NavigationTreeTest extends PmaTestCase
     }
 
     /**
-     * Tests sortNode() method
+     * Tests sortNode() method.
      *
      * @return void
      */
@@ -263,7 +263,7 @@ class NavigationTreeTest extends PmaTestCase
     }
 
     /**
-     * Tests _parsePath() method
+     * Tests _parsePath() method.
      *
      * @throws \ReflectionException
      */
@@ -281,7 +281,7 @@ class NavigationTreeTest extends PmaTestCase
     }
 
     /**
-     * Get inaccessible method (protected / private) and make it public using reflection
+     * Get inaccessible method (protected / private) and make it public using reflection.
      *
      * @param $name
      * @return \ReflectionMethod
