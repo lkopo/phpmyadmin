@@ -28,6 +28,7 @@ require_once 'libraries/check_user_privileges.inc.php';
  * Tests for PhpMyAdmin\Navigation\NavigationTree class
  *
  * @package PhpMyAdmin-test
+ * @group navigation
  */
 class NavigationTreeTest extends PmaTestCase
 {

@@ -17,6 +17,7 @@ use PhpMyAdmin\Tests\PmaTestCase;
  * Tests for PhpMyAdmin\Navigation\Navigation class
  *
  * @package PhpMyAdmin-test
+ * @group navigation
  */
 class NavigationTest extends PmaTestCase
 {
@@ -159,7 +160,7 @@ class NavigationTest extends PmaTestCase
         $this->assertContains(
             '<a href="navigation.php?'
             . 'unhideNavItem=1&amp;itemType=table&amp;'
-            . 'itemName=tableName&amp;dbName=db&amp;lang=en"'
+            . 'itemName=tableName&amp;dbName=db&amp;server=0&amp;lang=en"'
             . ' class="unhideNavItem ajax">',
             $html
         );
