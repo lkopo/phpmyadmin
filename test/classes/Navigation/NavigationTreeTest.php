@@ -11,6 +11,7 @@ namespace PhpMyAdmin\Tests\Navigation;
 
 use PhpMyAdmin\Config;
 use PhpMyAdmin\Navigation\NavigationTree;
+use PhpMyAdmin\Navigation\NodeFactory;
 use PhpMyAdmin\Tests\PmaTestCase;
 use PhpMyAdmin\Theme;
 
@@ -52,6 +53,11 @@ class NavigationTreeTest extends PmaTestCase
         $GLOBALS['cfg']['Server']['DisableIS'] = false;
         $GLOBALS['cfg']['NavigationTreeEnableGrouping'] = true;
         $GLOBALS['cfg']['ShowDatabasesNavigationAsTree']  = true;
+
+        $GLOBALS['cfg']['NavigationTreeDbSeparator'] = '_';
+        $GLOBALS['cfg']['FirstLevelNavigationItems'] = 100;
+
+        $GLOBALS['cfg']['NaturalOrder'] = true;
 
         $GLOBALS['pmaThemeImage'] = 'image';
         $GLOBALS['db'] = 'db';
@@ -101,5 +107,171 @@ class NavigationTreeTest extends PmaTestCase
     {
         $result = $this->object->renderDbSelect();
         $this->assertContains('pma_navigation_select_database', $result);
+    }
+
+    /**
+     * Tests _getNavigationDbPos() method with following configuration:
+     * $GLOBALS['db'] = '';
+     *
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function testGetNavigationDbPos_NoDB()
+    {
+        $GLOBALS['db'] = '';
+        $method = $this->getMethod('_getNavigationDbPos');
+        $this->assertEquals(0, $method->invoke($this->object));
+    }
+
+    /**
+     * Tests _getNavigationDbPos() method with following configuration:
+     * $GLOBALS['cfg']['Server']['DisableIS'] = false;
+     *
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function testGetNavigationDbPos()
+    {
+        $expectedQuery = "SELECT (COUNT(DB_first_level) DIV 100) * 100 "
+                        . "from ( "
+                        . " SELECT distinct SUBSTRING_INDEX(SCHEMA_NAME, "
+                        . " '_', 1) "
+                        ." DB_first_level "
+                        . " FROM INFORMATION_SCHEMA.SCHEMATA "
+                        . " WHERE `SCHEMA_NAME` < 'db' "
+                        .") t ";
+        $dbi = $this->getMockBuilder('PhpMyAdmin\DatabaseInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $dbi->expects($this->once())
+            ->method('fetchValue')
+            ->will($this->returnValue(0))
+            ->with($expectedQuery);
+        $dbi->expects($this->any())->method('escapeString')
+            ->will($this->returnArgument(0));
+
+        $GLOBALS['dbi'] = $dbi;
+
+        $method = $this->getMethod('_getNavigationDbPos');
+        $this->assertEquals(0, $method->invoke($this->object));
+    }
+
+    /**
+     * Tests _getNavigationDbPos() method with following configuration:
+     * $GLOBALS['cfg']['Server']['DisableIS'] = true;
+     * $GLOBALS['dbs_to_test'] = false;
+     *
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function testGetNavigationDbPos_DisableIS_True_NoDbs()
+    {
+        $dbi = $this->getMockBuilder('PhpMyAdmin\DatabaseInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $dbi->expects($this->once())
+            ->method('tryQuery')
+            ->with("SHOW DATABASES")
+            ->will($this->returnValue(true));
+        $dbi->expects($this->once())
+            ->method('fetchArray')
+            ->will($this->returnValue([
+                'db'
+            ]));
+        $dbi->expects($this->any())->method('escapeString')
+            ->will($this->returnArgument(0));
+
+        $GLOBALS['dbi'] = $dbi;
+        $GLOBALS['dbs_to_test'] = false;
+        $GLOBALS['cfg']['Server']['DisableIS'] = true;
+
+        $method = $this->getMethod('_getNavigationDbPos');
+        $this->assertEquals(0, $method->invoke($this->object));
+    }
+
+    /**
+     * Tests _getNavigationDbPos() method with following configuration:
+     * $GLOBALS['cfg']['Server']['DisableIS'] = true;
+     * $GLOBALS['dbs_to_test'] = ['information_schema', 'performance_schema', 'db'];
+     *
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function testGetNavigationDbPos_DisableIS_True_WithDbs()
+    {
+        $dbi = $this->getMockBuilder('PhpMyAdmin\DatabaseInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $dbi->expects($this->any())->method('escapeString')
+            ->will($this->returnArgument(0));
+
+        $GLOBALS['dbi'] = $dbi;
+        $GLOBALS['dbs_to_test'] = [
+            'information_schema', 'performance_schema', 'db'
+        ];
+        $GLOBALS['cfg']['Server']['DisableIS'] = true;
+
+        $idx = 0;
+        foreach ($GLOBALS['dbs_to_test'] as $db) {
+            $dbi->expects($this->at($idx++))
+                ->method('tryQuery')
+                ->with("SHOW DATABASES LIKE '" . $db . "'")
+                ->will($this->returnValue(true));
+            $dbi->expects($this->at($idx++))
+                ->method('fetchArray')
+                ->will($this->returnValue([
+                    $db
+                ]));
+            $dbi->expects($this->at($idx++))
+                ->method('fetchArray')
+                ->will($this->returnValue(false));
+        }
+
+        $method = $this->getMethod('_getNavigationDbPos');
+        $this->assertEquals(0, $method->invoke($this->object));
+    }
+
+    /**
+     * Tests sortNode() method
+     *
+     * @return void
+     */
+    public function testSortNode()
+    {
+        $nodeA = NodeFactory::getInstance(
+            'Node', 'someName'
+        );
+
+        $nodeB = NodeFactory::getInstance(
+            'Node', 'anotherName'
+        );
+
+        $this->assertGreaterThanOrEqual(1, NavigationTree::sortNode($nodeA, $nodeB));
+
+        $GLOBALS['cfg']['NaturalOrder'] = false;
+        $this->assertGreaterThanOrEqual(1, NavigationTree::sortNode($nodeA, $nodeB));
+
+        $nodeC = NodeFactory::getInstance(
+            'Node', 'thirdNode'
+        );
+        $nodeC->isNew = true;
+
+        $this->assertEquals(-1, NavigationTree::sortNode($nodeC, $nodeA));
+        $this->assertEquals(1, NavigationTree::sortNode($nodeA, $nodeC));
+    }
+
+    /**
+     * Get inaccessible method (protected / private) and make it public using reflection
+     *
+     * @param $name
+     * @return \ReflectionMethod
+     * @throws \ReflectionException
+     */
+    public function getMethod($name) {
+        $class = new \ReflectionClass('PhpMyAdmin\Navigation\NavigationTree');
+        $method = $class->getMethod($name);
+        $method->setAccessible(true);
+        return $method;
     }
 }

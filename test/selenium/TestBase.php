@@ -220,7 +220,7 @@ abstract class TestBase extends Selenium2TestCase
      */
     public function setUpPage()
     {
-        $this->currentWindow()->maximize();
+        //$this->currentWindow()->maximize();
     }
 
     /**
