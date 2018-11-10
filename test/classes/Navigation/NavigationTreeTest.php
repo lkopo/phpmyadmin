@@ -262,6 +262,24 @@ class NavigationTreeTest extends PmaTestCase
     }
 
     /**
+     * Tests _parsePath() method
+     *
+     * @throws \ReflectionException
+     */
+    public function testParsePath()
+    {
+        $path_root = "root";
+        $path_information_schema = "information_schema";
+        $aPath = base64_encode($path_root) . "." . base64_encode($path_information_schema);
+
+        $method = $this->getMethod('_parsePath');
+        $this->assertEquals(
+            [$path_root, $path_information_schema],
+            $method->invokeArgs($this->object, [$aPath])
+        );
+    }
+
+    /**
      * Get inaccessible method (protected / private) and make it public using reflection
      *
      * @param $name
