@@ -117,7 +117,7 @@ class NavigationTreeTest extends PmaTestCase
      * @return void
      * @throws \ReflectionException
      */
-    public function testGetNavigationDbPos_NoDB()
+    public function testGetNavigationDbPosNoDB()
     {
         $GLOBALS['db'] = '';
         $method = $this->getMethod('_getNavigationDbPos');
@@ -137,10 +137,10 @@ class NavigationTreeTest extends PmaTestCase
                         . "from ( "
                         . " SELECT distinct SUBSTRING_INDEX(SCHEMA_NAME, "
                         . " '_', 1) "
-                        ." DB_first_level "
+                        . " DB_first_level "
                         . " FROM INFORMATION_SCHEMA.SCHEMATA "
                         . " WHERE `SCHEMA_NAME` < 'db' "
-                        .") t ";
+                        . ") t ";
         $dbi = $this->getMockBuilder('PhpMyAdmin\DatabaseInterface')
             ->disableOriginalConstructor()
             ->getMock();
@@ -165,7 +165,7 @@ class NavigationTreeTest extends PmaTestCase
      * @return void
      * @throws \ReflectionException
      */
-    public function testGetNavigationDbPos_DisableIS_True_NoDbs()
+    public function testGetNavigationDbPosDisableISTrueNoDbs()
     {
         $dbi = $this->getMockBuilder('PhpMyAdmin\DatabaseInterface')
             ->disableOriginalConstructor()
@@ -198,7 +198,7 @@ class NavigationTreeTest extends PmaTestCase
      * @return void
      * @throws \ReflectionException
      */
-    public function testGetNavigationDbPos_DisableIS_True_WithDbs()
+    public function testGetNavigationDbPosDisableISTrueWithDbs()
     {
         $dbi = $this->getMockBuilder('PhpMyAdmin\DatabaseInterface')
             ->disableOriginalConstructor()
@@ -284,7 +284,7 @@ class NavigationTreeTest extends PmaTestCase
     /**
      * Get inaccessible method (protected / private) and make it public using reflection.
      *
-     * @param $name
+     * @param string $name Method name
      * @return \ReflectionMethod
      * @throws \ReflectionException
      */

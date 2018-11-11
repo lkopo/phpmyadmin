@@ -1,10 +1,11 @@
 <?php
+/* vim: set expandtab sw=4 ts=4 sts=4: */
 /**
- * Created by PhpStorm.
- * User: lkopo
- * Date: 10/11/2018
- * Time: 19:49
+ * Tests for PhpMyAdmin\Navigation\NavigationHeader class
+ *
+ * @package PhpMyAdmin-test
  */
+declare(strict_types=1);
 
 namespace PhpMyAdmin\Tests\Navigation;
 
