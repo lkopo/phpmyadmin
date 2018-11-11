@@ -8,9 +8,9 @@ https://www.phpmyadmin.net/
 Code status
 -----------
 
-.. image:: https://travis-ci.org/lkopo/phpmyadmin.svg?branch=master
+.. image:: https://travis-ci.com/lkopo/phpmyadmin.svg?branch=master
     :alt: Build status
-    :target: https://travis-ci.org/lkopo/phpmyadmin
+    :target: https://travis-ci.com/lkopo/phpmyadmin
 
 .. image:: https://codecov.io/gh/lkopo/phpmyadmin/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/lkopo/phpmyadmin
