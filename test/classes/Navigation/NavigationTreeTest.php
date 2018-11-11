@@ -265,6 +265,7 @@ class NavigationTreeTest extends PmaTestCase
     /**
      * Tests _parsePath() method.
      *
+     * @return void
      * @throws \ReflectionException
      */
     public function testParsePath()
